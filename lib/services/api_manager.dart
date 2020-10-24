@@ -7,11 +7,9 @@ class APIManager {
   Future signIn(String email, String password, [String baseUrl]) async {
     Map data = {'email': email, 'password': password};
     dynamic responseJson = {};
+    String uri = baseUrl.isEmpty ? Strings.baseUrl : baseUrl;
     try {
-      var response = await http.post(
-          (baseUrl != null ? baseUrl : Strings.baseUrl),
-          headers: {},
-          body: data);
+      var response = await http.post(uri, headers: {}, body: data);
       print('API Manger : ${response.statusCode}');
       if (response.statusCode == 200) {
         responseJson = jsonDecode(response.body);

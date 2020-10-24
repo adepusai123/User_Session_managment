@@ -11,15 +11,22 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailCtrl = TextEditingController();
   TextEditingController _pwdCtrl = TextEditingController();
-  bool _isLoading = false;
+  TextEditingController _baseUrlCtrl = TextEditingController();
 
-  Future userAuthenticate(String email, String password) async {
+  bool _isLoading = false;
+  bool _isDeveloper = false;
+
+  List<bool> isSelected;
+
+  Future userAuthenticate(
+      String email, String password, String loginUrl) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       _isLoading = true;
     });
     // signin(_emailCtrl.text, _pwdCtrl.text);
-    Map response = await APIManager().signIn(email, password);
+    Map response = await APIManager().signIn(email, password, loginUrl);
+    // print('-=---------- $email, $password, $response');
 
     if (response['token'] != null) {
       sharedPreferences.setString("token", response['token']);
@@ -30,6 +37,12 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  @override
+  void initState() {
+    isSelected = [true, false];
+    super.initState();
   }
 
   @override
@@ -53,10 +66,103 @@ class _LoginPageState extends State<LoginPage> {
                   // header section
                   headerContainer(),
                   inputContainer(),
-                  buttonContainer()
+                  urlContainer(),
+                  toggleContainer(),
+                  buttonContainer(),
                 ],
               ),
             ),
+    );
+  }
+
+  Container urlContainer() {
+    return _isDeveloper
+        ? Container(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            margin: EdgeInsets.only(bottom: 15),
+            child: TextFormField(
+              controller: _baseUrlCtrl,
+              cursorColor: Colors.white,
+              decoration: InputDecoration(
+                icon: Icon(
+                  Icons.http_outlined,
+                  color: Colors.white,
+                ),
+                hintText: 'Login URI',
+                hintStyle: TextStyle(color: Colors.white),
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
+              ),
+            ),
+          )
+        : Container();
+  }
+
+  Container toggleContainer() {
+    return Container(
+      color: Colors.transparent,
+      margin: EdgeInsets.only(right: 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text(
+            'Are you Developer?',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          ToggleButtons(
+            borderWidth: 1,
+            selectedBorderColor: Colors.white,
+            selectedColor: Colors.green,
+            borderColor: Colors.black,
+            fillColor: Colors.deepPurple,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(2),
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  'No',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  'Yes',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            ],
+            onPressed: (int index) {
+              setState(() {
+                for (int i = 0; i < isSelected.length; i++) {
+                  isSelected[i] = i == index;
+                }
+              });
+              // hide & show here
+              setState(() {
+                _isDeveloper = isSelected[1] ? true : false;
+                if (!_isDeveloper) {
+                  // clear if value exist if _isDeveloper is false
+                  _baseUrlCtrl.clear();
+                }
+              });
+            },
+            isSelected: isSelected,
+          ),
+        ],
+      ),
     );
   }
 
@@ -80,7 +186,9 @@ class _LoginPageState extends State<LoginPage> {
         ),
         elevation: 0.0,
         onPressed: () {
-          userAuthenticate(_emailCtrl.text, _pwdCtrl.text);
+          if (_emailCtrl.text != null && _pwdCtrl.text != null) {
+            userAuthenticate(_emailCtrl.text, _pwdCtrl.text, _baseUrlCtrl.text);
+          }
         },
       ),
     );
