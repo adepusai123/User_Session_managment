@@ -1,9 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_login_session/home_page.dart';
+import 'package:user_login_session/services/api_manager.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,35 +13,23 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _pwdCtrl = TextEditingController();
   bool _isLoading = false;
 
-  Future signin(String email, String password) async {
+  Future userAuthenticate(String email, String password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    Map data = {'email': email, 'password': password};
-    dynamic jsonResponse = {};
-    try {
-      var response =
-          await http.post('http://192.168.1.100:3000', headers: {}, body: data);
-      print('-------Valid Response : ${response.statusCode}');
-      if (response.statusCode == 200) {
-        setState(() {
-          _isLoading = false;
-        });
-        String jsonString = response.body;
-        jsonResponse = jsonDecode(jsonString);
-        sharedPreferences.setString("token", jsonResponse['token']);
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => HomePage()),
-            (Route<dynamic> route) => false);
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (ex) {
-      print('Exception $ex');
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+    });
+    // signin(_emailCtrl.text, _pwdCtrl.text);
+    Map response = await APIManager().signIn(email, password);
+
+    if (response['token'] != null) {
+      sharedPreferences.setString("token", response['token']);
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => HomePage()),
+          (Route<dynamic> route) => false);
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -94,10 +80,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         elevation: 0.0,
         onPressed: () {
-          setState(() {
-            _isLoading = true;
-          });
-          signin(_emailCtrl.text, _pwdCtrl.text);
+          userAuthenticate(_emailCtrl.text, _pwdCtrl.text);
         },
       ),
     );
