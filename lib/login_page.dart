@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_login_session/home_page.dart';
+import 'package:user_login_session/screens/signup_screen.dart';
 import 'package:user_login_session/services/api_manager.dart';
+
+import 'components/button_component.dart';
+import 'components/custom_input.dart';
+import 'components/password.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -68,6 +73,17 @@ class _LoginPageState extends State<LoginPage> {
                   urlContainer(),
                   toggleContainer(),
                   buttonContainer(),
+                  Button(
+                    labelText: 'Sign Up',
+                    color: Colors.deepPurple[300],
+                    press: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) {
+                          return Signup();
+                        }),
+                      );
+                    },
+                  )
                 ],
               ),
             ),
@@ -198,40 +214,14 @@ class _LoginPageState extends State<LoginPage> {
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 25),
       child: Column(
         children: [
-          TextFormField(
+          CustomInputField(
             controller: _emailCtrl,
-            cursorColor: Colors.white,
-            decoration: InputDecoration(
-              icon: Icon(
-                Icons.email,
-                color: Colors.white,
-              ),
-              hintText: 'Email',
-              hintStyle: TextStyle(color: Colors.white),
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white),
-              ),
-            ),
+            hintText: 'Email',
           ),
           SizedBox(
             height: 20,
           ),
-          TextFormField(
-            controller: _pwdCtrl,
-            obscureText: true,
-            cursorColor: Colors.white,
-            decoration: InputDecoration(
-              icon: Icon(
-                Icons.lock,
-                color: Colors.white,
-              ),
-              hintText: 'Password',
-              hintStyle: TextStyle(color: Colors.white),
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white),
-              ),
-            ),
-          ),
+          PasswordField(controller: _pwdCtrl),
         ],
       ),
     );
