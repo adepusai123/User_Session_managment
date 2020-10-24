@@ -26,7 +26,6 @@ class _LoginPageState extends State<LoginPage> {
     });
     // signin(_emailCtrl.text, _pwdCtrl.text);
     Map response = await APIManager().signIn(email, password, loginUrl);
-    // print('-=---------- $email, $password, $response');
 
     if (response['token'] != null) {
       sharedPreferences.setString("token", response['token']);
